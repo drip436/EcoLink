@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: Install Dependencies",
+      "type": "shell",
+      "command": "source .venv/bin/activate && pip install -r backend/requirements.txt",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Frontend: Install Dependencies",
+      "type": "shell",
+      "command": "source .venv/bin/activate && pip install -r frontend/requirements.txt",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Backend: Run FastAPI",
+      "type": "shell",
+      "command": "source .venv/bin/activate && cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Uvicorn running.*",
+          "endsPattern": "^.*Application startup complete.*"
+        }
+      },
+      "group": "test"
+    },
+    {
+      "label": "Frontend: Run Reflex",
+      "type": "shell",
+      "command": "source .venv/bin/activate && cd frontend && reflex run",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Database: Initialize",
+      "type": "shell",
+      "command": "source .venv/bin/activate && cd backend && python init_db.py",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "All: Install All Dependencies",
+      "type": "shell",
+      "command": "source .venv/bin/activate && pip install -r backend/requirements.txt && pip install -r frontend/requirements.txt",
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}

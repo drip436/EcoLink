@@ -1,0 +1,58 @@
+DeprecationWarning: Passing strings to disable_plugins has been deprecated in 
+version 0.8.28. pass Plugin classes directly instead, e.g. 
+disable_plugins=[SitemapPlugin]. It will be completely removed in 0.9.0. 
+(rxconfig.py:7)
+Warning: Unable to bind to :3000 due to: [Errno 98] Address already in use.
+Info: The frontend will run on port 3001.
+Warning: Unable to bind to :8000 due to: [Errno 98] Address already in use.
+Info: The backend will run on port 8001.
+───────────────────────────── Starting Reflex App ──────────────────────────────
+───────────────────────────────── App Running ──────────────────────────────────
+Traceback (most recent call last):
+  File "/home/adrian/Documentos/EcoLink/.venv/bin/reflex", line 6, in <module>
+    sys.exit(cli())
+             ~~~^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/click/core.py", line 1485, in __call__
+    return self.main(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/click/core.py", line 1406, in main
+    rv = self.invoke(ctx)
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/click/core.py", line 1873, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/click/core.py", line 1269, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/click/core.py", line 824, in invoke
+    return callback(*args, **kwargs)
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/reflex/reflex.py", line 391, in run
+    _run(
+    ~~~~^
+        constants.Env.DEV if env == constants.Env.DEV else constants.Env.PROD,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        single_port,
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/reflex/reflex.py", line 293, in _run
+    backend_cmd(
+    ~~~~~~~~~~~^
+        backend_host,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        frontend,
+        ^^^^^^^^^
+    )
+    ^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/reflex/utils/exec.py", line 388, in run_backend
+    run_granian_backend(host, port, loglevel)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/reflex/utils/exec.py", line 553, in run_granian_backend
+    reload_paths=get_reload_paths(),
+                 ~~~~~~~~~~~~~~~~^^
+  File "/home/adrian/Documentos/EcoLink/.venv/lib/python3.13/site-packages/reflex/utils/exec.py", line 431, in get_reload_paths
+    raise RuntimeError(msg)
+RuntimeError: There should not be an `__init__.py` file in your app root directory
+App running at: http://localhost:3001/
+Backend running at: http://0.0.0.0:8001
