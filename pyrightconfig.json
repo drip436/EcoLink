@@ -1,0 +1,24 @@
+{
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "venvPath": "${workspaceFolder}",
+  "venv": ".venv",
+  "include": [
+    "backend",
+    "frontend"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "**/.web"
+  ],
+  "stubPath": "${workspaceFolder}/stubs",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalSubscript": false,
+  "reportOptionalOperand": false,
+  "reportOptionalCall": false
+}

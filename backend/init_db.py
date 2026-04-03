@@ -1,28 +1,44 @@
 """
-Script para inicializar BD con datos de demostración
+Script para inicializar BD PostgreSQL con datos de demostración
 """
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.database import SessionLocal, Base, engine
 from app.models.user import User, UserRole
 from app.models.route import Route, RouteStatus
 from app.models.recycling_point import RecyclingPoint
 from app.utils.security import hash_password
+from app.config import DATABASE_URL
 from datetime import datetime, timedelta
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def init_db():
-    """Inicializar BD con datos de demostración"""
+    """Inicializar BD PostgreSQL con datos de demostración"""
+    logger.info("🗄️ Inicializando base de datos PostgreSQL...")
+    logger.info(f"📍 Base de datos: {DATABASE_URL}")
+    
     # Crear todas las tablas
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Tablas creadas exitosamente")
+    except Exception as e:
+        logger.error(f"❌ Error creando tablas: {str(e)}")
+        return False
     
     db = SessionLocal()
     
     try:
-        # Crear usuarios de prueba
-        logger.info("Creando usuarios...")
+        # Verificar si ya hay usuarios
+        existing_users = db.query(User).count()
+        if existing_users > 0:
+            logger.info(f"ℹ️ Base de datos ya tiene {existing_users} usuarios. Saltando inserción de datos demo.")
+            return True
+        
+        logger.info("📝 Creando usuarios de demostración...")
         
         # Admin
         admin_user = User(
@@ -245,19 +261,22 @@ def init_db():
         db.commit()
         logger.info("✓ Estadísticas de gamificación inicializadas")
         
-        logger.info("\n✅ Base de datos inicializada exitosamente!")
+        logger.info("\n✨ Base de datos inicializada exitosamente!")
         logger.info("\n📝 Usuarios de prueba:")
         logger.info("   Admin:    admin@ecolink.com / admin123")
         logger.info("   Ciudadano 1: juan@example.com / citizen123")
         logger.info("   Ciudadano 2: maria@example.com / citizen123")
         logger.info("   Reciclador: recycler@ecolink.com / recycler123")
+        return True
         
     except Exception as e:
-        logger.error(f"❌ Error inicializando BD: {e}")
+        logger.error(f"❌ Error inicializando BD: {e}", exc_info=True)
         db.rollback()
+        return False
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    init_db()
+    success = init_db()
+    sys.exit(0 if success else 1)

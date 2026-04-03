@@ -27,13 +27,18 @@ def update_user_points(db: Session, user_id: int, points: int) -> UserGamificati
     """Actualizar puntos del usuario y calcular nivel"""
     gamification = get_or_create_user_gamification(db, user_id)
     
-    gamification.total_points += points
-    gamification.points_this_month += points
-    gamification.points_this_week += points
-    gamification.experience += points
+    # Actualizar valores de forma segura con SQLAlchemy
+    new_total_points = (gamification.total_points or 0) + points
+    new_points_month = (gamification.points_this_month or 0) + points
+    new_points_week = (gamification.points_this_week or 0) + points
+    new_experience = (gamification.experience or 0) + points
+    new_level = (new_experience // POINTS_PER_LEVEL) + 1
     
-    # Calcular nivel (cada POINTS_PER_LEVEL de experience, un nivel)
-    gamification.level = (gamification.experience // POINTS_PER_LEVEL) + 1
+    gamification.total_points = new_total_points  # type: ignore
+    gamification.points_this_month = new_points_month  # type: ignore
+    gamification.points_this_week = new_points_week  # type: ignore
+    gamification.experience = new_experience  # type: ignore
+    gamification.level = new_level  # type: ignore
     
     db.add(gamification)
     db.commit()
@@ -46,8 +51,8 @@ def increment_collection_count(db: Session, user_id: int, weight_kg: int) -> Use
     """Incrementar contador de colecciones del usuario"""
     gamification = get_or_create_user_gamification(db, user_id)
     
-    gamification.total_collections += 1
-    gamification.total_weight_kg += weight_kg
+    gamification.total_collections = (gamification.total_collections or 0) + 1  # type: ignore
+    gamification.total_weight_kg = (gamification.total_weight_kg or 0) + weight_kg  # type: ignore
     
     # Le damos puntos por la colección
     points = BASE_POINTS_PER_COLLECTION * (weight_kg // 5 + 1)  # Más peso = más puntos

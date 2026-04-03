@@ -23,7 +23,7 @@ def get_my_stats(
 ):
     """Obtener mis estadísticas de gamificación"""
     user = get_current_user(token, db)
-    gamification = get_or_create_user_gamification(db, user.id)
+    gamification = get_or_create_user_gamification(db, user.id)  # type: ignore
     return UserGamificationResponse.model_validate(gamification)
 
 

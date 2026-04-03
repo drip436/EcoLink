@@ -51,20 +51,20 @@ class RecyclingPoint(Base):
     def get_waste_types(self):
         """Retorna lista de tipos de residuos que acepta"""
         waste_types = []
-        if self.accepts_cardboard:
+        if self.accepts_cardboard is True:
             waste_types.append("Cartón")
-        if self.accepts_plastic:
+        if self.accepts_plastic is True:
             waste_types.append("Plástico")
-        if self.accepts_glass:
+        if self.accepts_glass is True:
             waste_types.append("Vidrio")
-        if self.accepts_metal:
+        if self.accepts_metal is True:
             waste_types.append("Metal")
-        if self.accepts_organic:
+        if self.accepts_organic is True:
             waste_types.append("Orgánico")
-        if self.accepts_batteries:
+        if self.accepts_batteries is True:
             waste_types.append("Pilas")
-        if self.accepts_oil:
+        if self.accepts_oil is True:
             waste_types.append("Aceite")
-        if self.accepts_electronics:
+        if self.accepts_electronics is True:
             waste_types.append("Electrónica")
         return waste_types

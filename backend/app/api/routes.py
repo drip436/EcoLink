@@ -17,9 +17,14 @@ def check_admin(token: str, db: Session = Depends(get_db)):
     """Verificar que el usuario sea admin"""
     from app.crud.user import get_user
     payload = decode_token(token)
-    user_id = int(payload.get("sub"))
-    user = get_user(db, user_id)
-    if not user or user.role != UserRole.ADMIN:
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    user = get_user(db, int(user_id_str))
+    if not user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User not found")
+    user_role = str(user.role) if user.role is not None else ""  # type: ignore
+    if user_role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return user
 

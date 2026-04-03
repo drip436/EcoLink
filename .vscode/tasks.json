@@ -4,7 +4,7 @@
     {
       "label": "Backend: Install Dependencies",
       "type": "shell",
-      "command": "source .venv/bin/activate && pip install -r backend/requirements.txt",
+      "command": ".venv\\Scripts\\activate.bat && pip install -r backend/requirements.txt",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -14,14 +14,14 @@
     {
       "label": "Frontend: Install Dependencies",
       "type": "shell",
-      "command": "source .venv/bin/activate && pip install -r frontend/requirements.txt",
+      "command": ".venv\\Scripts\\activate.bat && pip install -r frontend/requirements.txt",
       "problemMatcher": [],
       "group": "build"
     },
     {
       "label": "Backend: Run FastAPI",
       "type": "shell",
-      "command": "source .venv/bin/activate && cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+      "command": ".venv\\Scripts\\activate.bat && cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
       "isBackground": true,
       "problemMatcher": {
         "pattern": {
@@ -41,7 +41,7 @@
     {
       "label": "Frontend: Run Reflex",
       "type": "shell",
-      "command": "source .venv/bin/activate && cd frontend && reflex run",
+      "command": ".venv\\Scripts\\activate.bat && cd frontend && reflex run",
       "isBackground": true,
       "problemMatcher": [],
       "group": "test"
@@ -49,14 +49,14 @@
     {
       "label": "Database: Initialize",
       "type": "shell",
-      "command": "source .venv/bin/activate && cd backend && python init_db.py",
+      "command": ".venv\\Scripts\\activate.bat && cd backend && python init_db.py",
       "problemMatcher": [],
       "group": "build"
     },
     {
       "label": "All: Install All Dependencies",
       "type": "shell",
-      "command": "source .venv/bin/activate && pip install -r backend/requirements.txt && pip install -r frontend/requirements.txt",
+      "command": ".venv\\Scripts\\activate.bat && pip install -r backend/requirements.txt && pip install -r frontend/requirements.txt",
       "problemMatcher": [],
       "group": "build"
     }

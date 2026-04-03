@@ -155,12 +155,15 @@ def register_page() -> rx.Component:
                                     color="#4b5563",
                                     font_size="0.95rem",
                                 ),
-                                rx.link(
+                                rx.button(
                                     "Inicia sesión",
-                                    href="/login",
+                                    on_click=AppState.go_to_login,
+                                    background="transparent",
                                     color="#10b981",
                                     font_weight="600",
-                                    text_decoration="none",
+                                    border="none",
+                                    padding="0",
+                                    cursor="pointer",
                                     _hover={
                                         "text_decoration": "underline",
                                         "color": "#059669",

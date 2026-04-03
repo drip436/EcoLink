@@ -3,6 +3,7 @@ CRUD operations para Colecciones
 """
 from sqlalchemy.orm import Session
 from datetime import datetime
+from typing import Optional
 from app.models.collection import Collection, CollectionStatus
 from app.schemas.collection import CollectionCreate
 
@@ -25,7 +26,7 @@ def create_collection(db: Session, user_id: int, collection: CollectionCreate) -
 
 
 def get_collections(
-    db: Session, user_id: int = None, skip: int = 0, limit: int = 100
+    db: Session, user_id: Optional[int] = None, skip: int = 0, limit: int = 100
 ) -> list[Collection]:
     """Obtener colecciones"""
     query = db.query(Collection)
@@ -36,15 +37,15 @@ def get_collections(
 
 def update_collection_status(
     db: Session, collection_id: int, status: str
-) -> Collection:
+) -> Optional[Collection]:
     """Actualizar estado de una colección"""
     db_collection = db.query(Collection).filter(Collection.id == collection_id).first()
     if not db_collection:
         return None
     
-    db_collection.status = status
+    db_collection.status = status  # type: ignore
     if status == CollectionStatus.COLLECTED:
-        db_collection.collected_at = datetime.utcnow()
+        db_collection.collected_at = datetime.utcnow()  # type: ignore
     
     db.add(db_collection)
     db.commit()

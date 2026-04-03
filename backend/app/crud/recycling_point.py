@@ -2,6 +2,7 @@
 CRUD operations para Puntos de Acopio
 """
 from sqlalchemy.orm import Session
+from typing import Optional
 from app.models.recycling_point import RecyclingPoint
 from app.schemas.recycling_point import RecyclingPointCreate, RecyclingPointUpdate
 
@@ -34,7 +35,7 @@ def create_recycling_point(db: Session, point: RecyclingPointCreate) -> Recyclin
     return db_point
 
 
-def get_recycling_point(db: Session, point_id: int) -> RecyclingPoint:
+def get_recycling_point(db: Session, point_id: int) -> Optional[RecyclingPoint]:
     """Obtener punto de acopio por ID"""
     return db.query(RecyclingPoint).filter(RecyclingPoint.id == point_id).first()
 
@@ -51,7 +52,7 @@ def get_recycling_points(
 
 def update_recycling_point(
     db: Session, point_id: int, point: RecyclingPointUpdate
-) -> RecyclingPoint:
+) -> Optional[RecyclingPoint]:
     """Actualizar punto de acopio"""
     db_point = get_recycling_point(db, point_id)
     if not db_point:

@@ -87,6 +87,27 @@ def login_page() -> rx.Component:
                                     width="100%",
                                 ),
                             ),
+                            # Success message
+                            rx.cond(
+                                AppState.auth_success != "",
+                                rx.box(
+                                    rx.hstack(
+                                        rx.text("✅", font_size="1.25rem"),
+                                        rx.text(
+                                            AppState.auth_success,
+                                            color="#15803d",
+                                            font_weight="500",
+                                        ),
+                                        spacing="2",
+                                        width="100%",
+                                    ),
+                                    padding="16px",
+                                    background="#dcfce7",
+                                    border_left="4px solid #22c55e",
+                                    border_radius="8px",
+                                    width="100%",
+                                ),
+                            ),
                             # Login Button
                             rx.button(
                                 rx.cond(
@@ -124,12 +145,15 @@ def login_page() -> rx.Component:
                                     color="#4b5563",
                                     font_size="0.95rem",
                                 ),
-                                rx.link(
+                                rx.button(
                                     "Regístrate aquí",
-                                    href="/register",
+                                    on_click=AppState.go_to_register,
+                                    background="transparent",
                                     color="#10b981",
                                     font_weight="600",
-                                    text_decoration="none",
+                                    border="none",
+                                    padding="0",
+                                    cursor="pointer",
                                     _hover={
                                         "text_decoration": "underline",
                                         "color": "#059669",

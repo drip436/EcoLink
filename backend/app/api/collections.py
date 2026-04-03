@@ -3,6 +3,7 @@ Endpoints de Colecciones/Recogidas
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from typing import Optional
 from app.database import get_db
 from app.schemas.collection import CollectionCreate, CollectionResponse
 from app.crud.collection import create_collection, get_collections, update_collection_status
@@ -15,12 +16,12 @@ router = APIRouter(prefix="/collections", tags=["collections"])
 @router.post("/", response_model=CollectionResponse)
 def create_new_collection(
     token: str = Query(...),
-    collection: CollectionCreate = None,
+    collection: Optional[CollectionCreate] = None,
     db: Session = Depends(get_db)
 ):
     """Crear una nueva colección/recogida"""
     user = get_current_user(token, db)
-    new_collection = create_collection(db, user.id, collection)
+    new_collection = create_collection(db, user.id, collection)  # type: ignore
     return CollectionResponse.model_validate(new_collection)
 
 
@@ -33,7 +34,7 @@ def get_my_collections(
 ):
     """Obtener mis colecciones"""
     user = get_current_user(token, db)
-    collections = get_collections(db, user.id, skip, limit)
+    collections = get_collections(db, user.id, skip, limit)  # type: ignore
     return [CollectionResponse.model_validate(c) for c in collections]
 
 
@@ -63,11 +64,11 @@ def update_status(
     collection = update_collection_status(db, collection_id, status)
     
     if not collection:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found")
+        raise HTTPException(status_code=404, detail="Collection not found")
     
     # Si se marca como collected, agregar puntos al usuario
     if status == "collected":
         from app.services.gamification_service import add_collection_points
-        add_collection_points(db, user.id, collection.weight_kg)
+        add_collection_points(db, user.id, collection.weight_kg)  # type: ignore
     
     return CollectionResponse.model_validate(collection)

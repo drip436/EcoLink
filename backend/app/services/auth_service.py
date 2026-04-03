@@ -27,10 +27,14 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     if not user:
         raise ValueError("Invalid email or password")
     
-    if not verify_password(password, user.hashed_password):
+    # Extraer valores de las columnas para evitar problemas de tipo
+    hashed_pwd = str(user.hashed_password) if user.hashed_password is not None else ""
+    is_user_active = bool(user.is_active) if user.is_active is not None else False
+    
+    if not verify_password(password, hashed_pwd):
         raise ValueError("Invalid email or password")
     
-    if not user.is_active:
+    if not is_user_active:
         raise ValueError("User is not active")
     
     return user

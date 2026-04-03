@@ -14,8 +14,10 @@ router = APIRouter(prefix="/users", tags=["users"])
 def get_current_user(token: str, db: Session = Depends(get_db)):
     """Dependencia para obtener usuario actual del token"""
     payload = decode_token(token)
-    user_id = int(payload.get("sub"))
-    user = get_user(db, user_id)
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    user = get_user(db, int(user_id))
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
@@ -48,5 +50,5 @@ def list_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 def update_me(token: str, user_update: UserUpdate, db: Session = Depends(get_db)):
     """Actualizar perfil del usuario actual"""
     current_user = get_current_user(token, db)
-    updated_user = update_user(db, current_user.id, user_update)
+    updated_user = update_user(db, current_user.id, user_update)  # type: ignore
     return UserResponse.model_validate(updated_user)

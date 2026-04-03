@@ -3,6 +3,7 @@ Endpoints de Puntos de Acopio
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from typing import Optional
 from app.database import get_db
 from app.schemas.recycling_point import (
     RecyclingPointCreate,
@@ -46,7 +47,7 @@ def get_point(point_id: int, db: Session = Depends(get_db)):
 def list_points(
     skip: int = 0,
     limit: int = 50,
-    waste_type: str = None,
+    waste_type: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """Listar puntos de acopio activos"""
@@ -58,14 +59,14 @@ def list_points(
         points = [
             p for p in points
             if (
-                (waste_type == "cardboard" and p.accepts_cardboard) or
-                (waste_type == "plastic" and p.accepts_plastic) or
-                (waste_type == "glass" and p.accepts_glass) or
-                (waste_type == "metal" and p.accepts_metal) or
-                (waste_type == "organic" and p.accepts_organic) or
-                (waste_type == "batteries" and p.accepts_batteries) or
-                (waste_type == "oil" and p.accepts_oil) or
-                (waste_type == "electronics" and p.accepts_electronics)
+                (waste_type == "cardboard" and p.accepts_cardboard is True) or
+                (waste_type == "plastic" and p.accepts_plastic is True) or
+                (waste_type == "glass" and p.accepts_glass is True) or
+                (waste_type == "metal" and p.accepts_metal is True) or
+                (waste_type == "organic" and p.accepts_organic is True) or
+                (waste_type == "batteries" and p.accepts_batteries is True) or
+                (waste_type == "oil" and p.accepts_oil is True) or
+                (waste_type == "electronics" and p.accepts_electronics is True)
             )
         ]
     
