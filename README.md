@@ -1,345 +1,156 @@
-# 🌱 EcoLink - Plataforma de Gestión Circular de Residuos
-
-**EcoLink** es una plataforma web integral para gestionar la recolección circular de residuos en ciudades. Permite a ciudadanos, administradores y recicladores colaborar en tiempo real para reducir residuos y promover la sostenibilidad.
-
----
-
-## 🎯 Características Principales
-
-### 👤 Para Ciudadanos
-- ✅ Registro e inicio de sesión seguro
-- ✅ Ver rutas de recolección en tiempo real
-- ✅ Localizar puntos de acopio de reciclaje (mapa interactivo)
-- ✅ Reportar residuos para recolección
-- ✅ Historial personal de reciclaje
-- ✅ **Sistema de Gamificación**:
-  - Ganar puntos por cada colección
-  - Subir de nivel
-  - Ver ranking global de recicladores
-  - Desbloquear logros
-
-### 🏢 Para Administradores
-- ✅ Panel de administración
-- ✅ Crear y gestionar rutas de recolección
-- ✅ Actualizar estado de rutas en tiempo real
-- ✅ Agregar/editar puntos de acopio
-- ✅ Ver estadísticas de reciclaje
-
-### ♻️ Sistema de Gamificación
-- **Puntos**: 10 puntos base por colección + bonificación por peso
-- **Niveles**: Avanza de nivel cada 100 puntos de experiencia
-- **Ranking**: Competición semanal y mensual entre usuarios
-- **Logros**: Desbloquea badges por hitos alcanzados
+# 🌿 EcoLink — Gestión Circular de Residuos
+**Proyecto Innovatec · Universidad · Mérida, Yucatán**
 
 ---
 
-## 🏗️ Arquitectura Técnica
+## ⚠️ Por qué desapareció el error WebSocket
+
+El error anterior:
+```
+Cannot connect to server: websocket error
+Check if server is reachable at ws://localhost:8000/_event
+```
+ocurría porque había **dos servidores separados** (FastAPI en :8000 + Reflex en :3000).
+Reflex necesita conectarse a su **propio** backend via WebSocket, no a FastAPI.
+
+**En esta versión**: todo vive en un solo proceso Reflex.
+- No hay `uvicorn main:app` separado.
+- La base de datos se accede con `rx.session()` dentro de los EventHandlers.
+- Reflex gestiona su WebSocket internamente.
+
+---
+
+## 📁 Estructura del proyecto
 
 ```
-EcoLink/
-├── backend/                 # FastAPI REST API
-│   ├── app/
-│   │   ├── models/         # SQLAlchemy ORM
-│   │   ├── schemas/        # Pydantic validación
-│   │   ├── crud/           # Operaciones BD
-│   │   ├── api/            # Endpoints FastAPI
-│   │   ├── services/       # Lógica de negocio
-│   │   └── utils/          # JWT, seguridad
-│   ├── init_db.py          # Script inicialización
-│   └── requirements.txt
-│
-├── frontend/               # Reflex (Python React-like)
-│   ├── app/
-│   │   ├── state.py        # Estado global
-│   │   ├── pages/          # Páginas de la app
-│   │   └── components/     # Componentes reutilizables
-│   ├── __init__.py         # Entrada principal Reflex
-│   └── requirements.txt
-│
-├── docker-compose.yml      # BD PostgreSQL
-└── README.md
+ecolink_v2/
+├── rxconfig.py                  ← Config Reflex + URL Supabase
+├── requirements.txt
+├── create_admin.py              ← Script setup inicial (ejecutar 1 vez)
+└── ecolink/
+    ├── ecolink.py               ← App Reflex + landing page /
+    ├── state.py                 ← Estado global + toda la lógica de BD
+    ├── models/
+    │   └── db.py               ← Modelos SQLModel (User, routes, points…)
+    ├── utils/
+    │   └── auth.py             ← Hash bcrypt + tokens de sesión
+    ├── components/
+    │   └── ui.py               ← Navbar, cards, badges, notificaciones
+    └── pages/
+        ├── auth.py             ← /login y /register
+        ├── dashboard.py        ← /dashboard (ciudadano)
+        └── admin.py            ← /admin (administrador)
 ```
 
 ---
 
-## 🚀 Instalación y Ejecución
+## 🚀 Instrucciones de ejecución
 
-### Requisitos Previos
-- Python 3.10+
-- pip (gestor de paquetes)
-- Git
+### Requisitos
+- Python 3.11+
+- Node.js 18+ (Reflex lo necesita para compilar el frontend)
 
-### Paso 1: Clonar el repositorio
+### Paso 1 — Instalar dependencias
 
 ```bash
-cd EcoLink
-```
-
-### Paso 2: Configurar Backend
-
-```bash
-# Entrar en directorio backend
-cd backend
-
-# Crear entorno virtual
-python -m venv venv
-
-# Activar entorno virtual
-# En Linux/Mac:
-source venv/bin/activate
-# En Windows:
-venv\\Scripts\\activate
-
-# Instalar dependencias
+cd ecolink_v2
 pip install -r requirements.txt
-
-# Crear archivo .env (copiar de .env.example y ajustar)
-cp .env.example .env
-
-# Inicializar bases de datos con datos de demostración
-python init_db.py
-
-# Ejecutar servidor FastAPI
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-El backend estará disponible en `http://localhost:8000`
-- **Documentación interactiva**: http://localhost:8000/docs (Swagger UI)
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
-
-### Paso 3: Configurar Frontend
-
-En otra terminal:
+### Paso 2 — Crear tablas y usuario admin en Supabase
 
 ```bash
-# Entrar en directorio frontend
-cd frontend
+python create_admin.py
+```
 
-# Crear entorno virtual
-python -m venv venv
+Esto:
+1. Crea todas las tablas en tu BD de Supabase
+2. Crea el usuario `admin@ecolink.mx` con contraseña `admin123`
+3. Inserta datos de demo (rutas, puntos, recompensas)
 
-# Activar entorno virtual
-source venv/bin/activate  # Linux/Mac
-# o
-venv\\Scripts\\activate   # Windows
+### Paso 3 — Ejecutar la aplicación
 
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Ejecutar Reflex dev server
+```bash
 reflex run
 ```
 
-El frontend estará disponible en `http://localhost:3000`
+La primera vez tarda ~2 minutos mientras descarga Node.js y los paquetes npm.
+
+**URLs:**
+| URL | Descripción |
+|---|---|
+| http://localhost:3000 | Landing page |
+| http://localhost:3000/register | Crear cuenta |
+| http://localhost:3000/login | Iniciar sesión |
+| http://localhost:3000/dashboard | Panel ciudadano |
+| http://localhost:3000/admin | Panel administrador |
 
 ---
 
-## 📝 Credenciales de Prueba
+## 👤 Credenciales de prueba
 
-Después de ejecutar `python init_db.py`, puedes usar:
-
-| Rol | Email | Password |
-|-----|-------|----------|
-| **Admin** | admin@ecolink.com | admin123 |
-| **Ciudadano 1** | juan@example.com | citizen123 |
-| **Ciudadano 2** | maria@example.com | citizen123 |
-| **Reciclador** | recycler@ecolink.com | recycler123 |
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administrador | admin@ecolink.mx | admin123 |
+| Ciudadano | (crear en /register) | (la que elijas) |
 
 ---
 
-## 📡 API REST Endpoints
+## 🗄️ Base de datos (Supabase)
 
-### Autenticación
-- `POST /auth/register` - Registrar nuevo usuario
-- `POST /auth/login` - Iniciar sesión
-- `POST /auth/verify` - Verificar token
-
-### Usuarios
-- `GET /users/me` - Obtener perfil actual
-- `GET /users/{user_id}` - Obtener usuario por ID
-- `GET /users/` - Listar usuarios
-
-### Rutas de Recolección
-- `POST /routes/` - Crear ruta (admin)
-- `GET /routes/` - Listar rutas activas
-- `GET /routes/{route_id}` - Obtener detalles de ruta
-- `PUT /routes/{route_id}` - Actualizar ruta (admin)
-
-### Puntos de Acopio
-- `POST /recycling-points/` - Crear punto (admin)
-- `GET /recycling-points/` - Listar puntos
-- `GET /recycling-points/{point_id}` - Obtener punto
-- `PUT /recycling-points/{point_id}` - Actualizar punto (admin)
-
-### Colecciones
-- `POST /collections/` - Crear colección
-- `GET /collections/my-collections` - Mis colecciones
-- `GET /collections/` - Todas las colecciones
-- `PUT /collections/{collection_id}/status/{status}` - Actualizar estado
-
-### Gamificación
-- `GET /gamification/my-stats` - Mis estadísticas
-- `GET /gamification/stats/{user_id}` - Stats de usuario
-- `GET /gamification/leaderboard` - Top 10 usuarios
-- `GET /gamification/level/{user_id}` - Nivel del usuario
+Tablas creadas automáticamente:
+- `users` — Usuarios con gamificación integrada
+- `collection_routes` — Rutas de recolección
+- `pickup_requests` — Solicitudes de recogida por ciudadanos
+- `collection_points` — Puntos de acopio en el mapa
+- `recycling_history` — Log de acciones de reciclaje
+- `rewards` — Recompensas canjeables
+- `reward_claims` — Historial de canjes
 
 ---
 
-## 🗄️ Base de Datos
+## 🎮 Gamificación
 
-### Modelos Principales
+| Acción | Puntos |
+|---|---|
+| Solicitar recogida pendiente | +30 |
+| Visitar punto de acopio | +40 a +70 (según el punto) |
+| Canjear recompensa | −N puntos |
 
-**User**
-- ID, email, contraseña hasheada, rol, datos personales
-
-**Route**
-- ID, nombre, ubicación, horario, estado, capacidad
-
-**RecyclingPoint**
-- ID, ubicación (lat/lng), tipos de residuos, capacidad
-
-**Collection**
-- ID, usuario, tipo residuo, peso, estado, timestamp
-
-**UserGamification**
-- ID usuario, puntos, nivel, estadísticas
-
-**Achievement**
-- ID, nombre, descripción, criterios, puntos recompensa
-
-### Base de datos por defecto
-- **SQLite** (desarrollo) - archivo `test.db`
-- **PostgreSQL** (producción recomendada)
-
-Para cambiar aPostgreSQL, editar `DATABASE_URL` en `.env`:
-```
-DATABASE_URL=postgresql://user:password@localhost/ecolink
-```
+| Nivel | Mínimo |
+|---|---|
+| 🌱 Semilla | 0 pts |
+| 🌿 Brote | 100 pts |
+| 🍃 Hoja | 300 pts |
+| 🌳 Árbol | 700 pts |
+| 🌲 Bosque | 1500 pts |
 
 ---
 
-## 🔐 Seguridad
+## 🔧 Cambiar la base de datos
 
-- **Contraseñas**: Hashadas con bcrypt
-- **Autenticación**: JWT (JSON Web Tokens)
-- **CORS**: Configurado para desarrollo (ajustar en producción)
-- **Validación**: Pydantic schemas en todos los endpoints
-
----
-
-## 🎮 Sistema de Gamificación - Detalles
-
-### Cálculo de Puntos
+En `rxconfig.py` cambia `SUPABASE_URL`:
 ```python
-puntos = 10 * (peso_kg // 5 + 1)
-# Ejemplo: 5kg = 20 puntos, 10kg = 30 puntos
-```
+# Para SQLite local (sin configuración):
+SUPABASE_URL = "sqlite:///ecolink.db"
 
-### Niveles
-```python
-nivel = (experiencia // 100) + 1
-# Nivel 1: 0-99 exp
-# Nivel 2: 100-199 exp
-# Nivel 3: 200-299 exp
-```
-
-### Logros Predefinidos
-- 🌱 **Primer Reciclaje**: Realiza tu primera colección (50pts)
-- 💪 **Eco Warrior**: 10 colecciones (500pts)
-- ♻️ **Sustentable**: 100kg reciclados (1000pts)
-
----
-
-## 📊 Ejemplos de Uso
-
-### Registrarse y Loguear
-```bash
-curl -X POST http://localhost:8000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "juan@example.com",
-    "full_name": "Juan Pérez",
-    "password": "securepass123"
-  }'
-```
-
-### Reportar Residuo para Recolección
-```bash
-curl -X POST http://localhost:8000/collections/ \
-  -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "waste_type": "plastic",
-    "weight_kg": 5,
-    "address": "Calle 50 #100"
-  }'
-```
-
-### Ver Ranking
-```bash
-curl http://localhost:8000/gamification/leaderboard
+# Para otro PostgreSQL:
+SUPABASE_URL = "postgresql://user:pass@host:5432/db"
 ```
 
 ---
 
-## 🛠️ Desarrollo y Extensiones
+## 📐 Cómo funciona Reflex "todo en uno"
 
-### Agregar nuevo endpoint
-1. Crear modelo en `models/`
-2. Crear schema en `schemas/`
-3. Crear CRUD en `crud/`
-4. Crear rotas en `api/`
-5. Incluir router en `main.py`
+```
+Browser (React compilado por Reflex)
+    ↕  WebSocket (ws://localhost:3000/_event)
+Reflex Server
+    ├── EventHandlers (Python puro en state.py)
+    │     └── rx.session() → SQLModel → Supabase
+    └── Estado → serializado → enviado al browser
+```
 
-### Agregar página en frontend
-1. Crear página en `app/pages/`
-2. Registrar ruta en `app/__init__.py`
-3. Agregar navegación si es necesario
-
----
-
-## 📚 Dependencias Principales
-
-### Backend
-- **FastAPI** - Framework web
-- **SQLAlchemy** - ORM
-- **Pydantic** - Validación
-- **python-jose** - JWT
-- **passlib** - Hashing de contraseñas
-- **Uvicorn** - Servidor ASGI
-
-### Frontend
-- **Reflex** - Framework Python para UI reactivo
-- **httpx** - Cliente HTTP
-
----
-
-## 🤝 Contribuir
-
-Para reportar bugs o sugerir mejoras, crear un issue en el repositorio.
-
----
-
-## 📄 Licencia
-
-EcoLink © 2024 - Proyecto Innovatec
-
----
-
-## 👨‍💼 Autor
-
-Desarrollado por: **[Tu Nombre]**
-Para: Proyecto Innovatec - Gestión Circular de Residuos
-
----
-
-## 🎓 Recursos Educativos
-
-- [FastAPI Docs](https://fastapi.tiangolo.com/)
-- [SQLAlchemy ORM](https://docs.sqlalchemy.org/)
-- [Reflex Docs](https://reflex.dev/)
-- [JWT en Python](https://python-jose.readthedocs.io/)
-
----
-
-**¡Únete a EcoLink y ayuda a construir un futuro sostenible!** 🌍♻️
+No hay REST API, no hay FastAPI, no hay fetch().
+Cada acción del usuario dispara un EventHandler Python en el servidor,
+que actualiza el estado y Reflex refresca la UI automáticamente.

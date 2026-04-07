@@ -1,83 +1,148 @@
 """
-EcoLink Frontend Principal
-Aplicación de Gestión Circular de Residuos
-Archivo principal que contiene toda la configuración del frontend
+ecolink/ecolink.py
+═══════════════════════════════════════════════════════════════════════════════
+Punto de entrada principal de la aplicación Reflex EcoLink.
+
+ARQUITECTURA:
+  - Todo corre en un solo proceso Reflex (no hay servidor FastAPI separado).
+  - Reflex usa su propio WebSocket interno (puerto 3000 por defecto).
+  - El error "Cannot connect ws://localhost:8000" se producía porque antes
+    había un FastAPI separado. Aquí NO existe ese servidor.
+  - La BD es Supabase (PostgreSQL) accesible con rx.session() + SQLModel.
+═══════════════════════════════════════════════════════════════════════════════
 """
+
 import reflex as rx
-import sys
-import os
-
-# Agregar ruta del frontend para importaciones
-frontend_path = os.path.dirname(os.path.abspath(__file__))
-parent_path = os.path.dirname(frontend_path)
-sys.path.insert(0, parent_path)
-
-# Importar estado global
-from frontend.app.state import AppState
-from frontend.app.pages.login import login_page
-from frontend.app.pages.register import register_page
-from frontend.app.pages.dashboard import dashboard_page
-from frontend.app.pages.profile import profile_page
-from frontend.app.components.navbar import navbar
+from ecolink.state import State
+from ecolink.components.ui import (
+    C_GREEN_DARK, C_GREEN_MID, C_ACCENT, C_BG
+)
 
 
-# ============================================================================
-# CREAR APLICACIÓN REFLEX
-# ============================================================================
+# ─── LANDING PAGE ─────────────────────────────────────────────────────────────
 
-app = rx.App()
+@rx.page(route="/", title="EcoLink · Gestión Circular de Residuos")
+def index() -> rx.Component:
+    """Página de inicio pública."""
+    return rx.center(
+        rx.vstack(
+            # Logo grande
+            rx.hstack(
+                rx.icon("leaf", color="#4caf50", size=56),
+                rx.text(
+                    "Eco",
+                    rx.text.span("Link", color=C_ACCENT),
+                    font_size="3.8rem",
+                    font_weight="900",
+                    color="white",
+                    font_family="Georgia, serif",
+                    letter_spacing="-0.02em",
+                ),
+                align="center",
+                gap="0.5rem",
+                justify="center",
+            ),
+            rx.text(
+                "Gestión Circular de Residuos",
+                color="rgba(255,255,255,0.85)",
+                font_size="1.2rem",
+                font_weight="500",
+                text_align="center",
+            ),
+            rx.text(
+                "Proyecto Innovatec · Universidad",
+                color="rgba(255,255,255,0.5)",
+                font_size="0.85rem",
+                text_align="center",
+            ),
+            rx.divider(border_color="rgba(255,255,255,0.18)", margin_y="1.4rem"),
+            # Feature chips
+            rx.flex(
+                *[
+                    rx.box(
+                        rx.hstack(
+                            rx.text(ic, font_size="1rem"),
+                            rx.text(lb, font_size="0.8rem", font_weight="600", color="white"),
+                            align="center", gap="0.35rem",
+                        ),
+                        background="rgba(255,255,255,0.1)",
+                        border="1px solid rgba(255,255,255,0.22)",
+                        border_radius="20px",
+                        padding="0.35rem 0.8rem",
+                    )
+                    for ic, lb in [
+                        ("🚛", "Rutas en tiempo real"),
+                        ("📍", "Puntos de acopio"),
+                        ("🏆", "Gamificación"),
+                        ("🎁", "Recompensas"),
+                        ("📊", "Ranking"),
+                    ]
+                ],
+                wrap="wrap",
+                justify="center",
+                gap="0.55rem",
+            ),
+            rx.divider(border_color="rgba(255,255,255,0.18)", margin_y="1.4rem"),
+            # CTAs
+            rx.hstack(
+                rx.link(
+                    rx.button(
+                        rx.icon("user-plus", size=17),
+                        "Crear cuenta gratis",
+                        size="4",
+                        background="white",
+                        color=C_GREEN_DARK,
+                        font_weight="800",
+                        cursor="pointer",
+                        _hover={"background": "#f0faf0", "transform": "translateY(-2px)"},
+                        transition="all 0.18s",
+                    ),
+                    href="/register",
+                ),
+                rx.link(
+                    rx.button(
+                        rx.icon("log-in", size=17),
+                        "Iniciar sesión",
+                        size="4",
+                        variant="outline",
+                        color="white",
+                        border_color="rgba(255,255,255,0.55)",
+                        cursor="pointer",
+                        _hover={"background": "rgba(255,255,255,0.1)"},
+                        transition="all 0.18s",
+                    ),
+                    href="/login",
+                ),
+                gap="1rem",
+                justify="center",
+                flex_wrap="wrap",
+            ),
+            align="center",
+            gap="0.7rem",
+            max_width="580px",
+            padding="0 1.2rem",
+            text_align="center",
+        ),
+        min_height="100vh",
+        background=f"linear-gradient(160deg, {C_GREEN_DARK} 0%, {C_GREEN_MID} 55%, #1b5e20 100%)",
+    )
 
 
-# ============================================================================
-# RUTAS PRINCIPALES
-# ============================================================================
+# ─── APP ──────────────────────────────────────────────────────────────────────
 
-@app.add_page
-def login_route() -> rx.Component:
-    """Página de Login - Ruta principal (/)"""
-    return login_page()
-
-
-@app.add_page
-def register_route() -> rx.Component:
-    """Página de Registro (/register)"""
-    return register_page()
-
-
-@app.add_page
-def dashboard_route() -> rx.Component:
-    """Dashboard Principal (/dashboard)"""
-    return dashboard_page()
-
-
-@app.add_page
-def profile_route() -> rx.Component:
-    """Perfil de Usuario (/profile)"""
-    return profile_page()
-
-
-# ============================================================================
-# INFORMACIÓN DE LA APLICACIÓN
-# ============================================================================
-
-"""
-🌱 ECOLINK - Plataforma de Gestión Circular de Residuos
-
-CARACTERÍSTICAS:
-✅ Autenticación de usuarios
-✅ Dashboard de actividades
-✅ Sistema de gamificación
-✅ Visualización de rutas de recolección
-✅ Mapa de puntos de acopio
-✅ Historial de colecciones
-
-USUARIOS DE PRUEBA:
-- Admin: admin@ecolink.com / admin123
-- Ciudadano: juan@example.com / citizen123
-- Reciclador: recycler@ecolink.com / recycler123
-
-ACCESO:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- Documentación: http://localhost:8000/docs
-"""
+app = rx.App(
+    theme=rx.theme(
+        appearance="light",
+        accent_color="green",
+        radius="medium",
+        scaling="100%",
+    ),
+    stylesheets=[
+        # Google Fonts para mejor tipografía
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+    ],
+    style={
+        "font_family": "Inter, sans-serif",
+        "background_color": C_BG,
+    },
+)

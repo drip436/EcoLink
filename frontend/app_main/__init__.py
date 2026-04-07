@@ -1,3 +1,0 @@
-"""
-EcoLink Frontend - App principal
-"""

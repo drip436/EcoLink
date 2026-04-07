@@ -1,4 +1,0 @@
-"""
-Componentes reutilizables de EcoLink
-"""
-
