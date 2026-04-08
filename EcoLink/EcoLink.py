@@ -1,32 +1,19 @@
 """
 ecolink/ecolink.py
-═══════════════════════════════════════════════════════════════════════════════
-Punto de entrada principal de la aplicación Reflex EcoLink.
-
-ARQUITECTURA:
-  - Todo corre en un solo proceso Reflex (no hay servidor FastAPI separado).
-  - Reflex usa su propio WebSocket interno (puerto 3000 por defecto).
-  - El error "Cannot connect ws://localhost:8000" se producía porque antes
-    había un FastAPI separado. Aquí NO existe ese servidor.
-  - La BD es Supabase (PostgreSQL) accesible con rx.session() + SQLModel.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import reflex as rx
-from ecolink.state import State
 from ecolink.components.ui import (
     C_GREEN_DARK, C_GREEN_MID, C_ACCENT, C_BG
 )
+from ecolink.pages.register import register_page  # noqa: F401
+from ecolink.pages.login import login_page        # noqa: F401
 
-
-# ─── LANDING PAGE ─────────────────────────────────────────────────────────────
 
 @rx.page(route="/", title="EcoLink · Gestión Circular de Residuos")
 def index() -> rx.Component:
-    """Página de inicio pública."""
     return rx.center(
         rx.vstack(
-            # Logo grande
             rx.hstack(
                 rx.icon("leaf", color="#4caf50", size=56),
                 rx.text(
@@ -50,13 +37,12 @@ def index() -> rx.Component:
                 text_align="center",
             ),
             rx.text(
-                "Proyecto Innovatec · Universidad",
+                "Proyecto Innovatec · Instituto tecnológico de Mérida",
                 color="rgba(255,255,255,0.5)",
                 font_size="0.85rem",
                 text_align="center",
             ),
             rx.divider(border_color="rgba(255,255,255,0.18)", margin_y="1.4rem"),
-            # Feature chips
             rx.flex(
                 *[
                     rx.box(
@@ -83,7 +69,6 @@ def index() -> rx.Component:
                 gap="0.55rem",
             ),
             rx.divider(border_color="rgba(255,255,255,0.18)", margin_y="1.4rem"),
-            # CTAs
             rx.hstack(
                 rx.link(
                     rx.button(
@@ -128,8 +113,6 @@ def index() -> rx.Component:
     )
 
 
-# ─── APP ──────────────────────────────────────────────────────────────────────
-
 app = rx.App(
     theme=rx.theme(
         appearance="light",
@@ -138,7 +121,6 @@ app = rx.App(
         scaling="100%",
     ),
     stylesheets=[
-        # Google Fonts para mejor tipografía
         "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
     ],
     style={
