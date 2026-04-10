@@ -9,6 +9,8 @@ from ecolink.components.ui import (
 from ecolink.pages.register import register_page  # noqa: F401
 from ecolink.pages.login import login_page        # noqa: F401
 from ecolink.pages.dashboard import dashboard_page  # noqa: F401
+from ecolink.pages.admin import admin_page # noqa: F401
+from ecolink.pages.map_page import map_page # noqa: F401
 
 @rx.page(route="/", title="EcoLink · Gestión Circular de Residuos")
 def index() -> rx.Component:

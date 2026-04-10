@@ -1,87 +1,51 @@
 """
 create_admin.py
-═══════════════════════════════════════════════════════════════════════════════
-Script de utilidad para crear el usuario administrador en Supabase.
-Ejecutar UNA SOLA VEZ antes de empezar a usar la app:
-
+Ejecutar UNA sola vez desde la raíz del proyecto:
     python create_admin.py
-
-Luego entra con:
-    Email:      admin@ecolink.mx
-    Contraseña: admin123
-═══════════════════════════════════════════════════════════════════════════════
 """
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 
-from sqlmodel import create_engine, Session, select, SQLModel
-from ecolink.models.db import User, CollectionRoute, CollectionPoint, Reward
+from sqlmodel import select
+import reflex as rx
+from ecolink.models.db import User
 from ecolink.utils.auth import hash_password
 
-DB_URL = (
-    "postgresql://postgres.djhiyafzjfwpaqccqdcy:ecolinkinnovatec"
-    "@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
-)
+ADMIN_EMAIL    = "adrian@ecolink.mx"
+ADMIN_PASSWORD = "Admin2024"
+ADMIN_NAME     = "Administrador EcoLink-Adrian"
 
-engine = create_engine(DB_URL, echo=False)
+def create_admin():
+    with rx.session() as db:
+        existing = db.exec(select(User).where(User.email == ADMIN_EMAIL)).first()
+        if existing:
+            # Si existe pero no es admin, promoverlo
+            if existing.role != "admin":
+                existing.role = "admin"
+                db.add(existing)
+                db.commit()
+                print(f"✅ Usuario existente promovido a admin: {ADMIN_EMAIL}")
+            else:
+                print(f"ℹ️  El admin ya existe: {ADMIN_EMAIL}")
+            return
 
-
-def main():
-    print("📦 Creando tablas en Supabase...")
-    SQLModel.metadata.create_all(engine)
-    print("✅ Tablas creadas")
-
-    with Session(engine) as db:
-        # ── Admin ──────────────────────────────────────────────────────
-        existing = db.exec(select(User).where(User.email == "admin@ecolink.mx")).first()
-        if not existing:
-            admin = User(
-                email="admin@ecolink.mx",
-                full_name="Administrador EcoLink",
-                hashed_password=hash_password("admin123"),
-                role="admin",
-            )
-            db.add(admin)
-            db.commit()
-            print("👤 Admin creado: admin@ecolink.mx / admin123")
-        else:
-            print("👤 Admin ya existe")
-
-        # ── Datos de demo (rutas, puntos, recompensas) ─────────────────
-        if not db.exec(select(CollectionRoute)).first():
-            print("🌱 Insertando datos de demo...")
-            for name, waste, zone, status in [
-                ("Ruta Norte · Plástico", "plástico", "Centro Norte",    "in_progress"),
-                ("Ruta Sur · Orgánico",   "orgánico", "Col. Sur",        "scheduled"),
-                ("Ruta Este · Vidrio",    "vidrio",   "Zona Industrial", "scheduled"),
-                ("Ruta Oeste · Papel",    "papel",    "Frac. Bello",     "scheduled"),
-            ]:
-                db.add(CollectionRoute(name=name, waste_type=waste, zone=zone, status=status))
-
-            for nm, addr, lat, lng, types, sch, pts in [
-                ("Centro de Acopio Municipal", "Calle 60 #500, Centro",   20.9674, -89.5926, "pilas,aceite,plastico,vidrio,papel", "Lun-Sáb 8:00-17:00", 60),
-                ("Punto Verde Altabrisa",      "Av. Altabrisa #200",      21.0012, -89.6145, "pilas,electronico,ropa",             "Lun-Vie 9:00-18:00",  50),
-                ("Ecocentro Gran Plaza",       "Gran Plaza, Mérida",      20.9856, -89.6234, "plastico,papel,vidrio",              "Todos los días 10:00-21:00", 40),
-                ("Recolección Aceite",         "Calle 21 #301, Col. Méx", 20.9523, -89.5789, "aceite",                             "Mié y Vie 9:00-14:00", 70),
-            ]:
-                db.add(CollectionPoint(name=nm, address=addr, latitude=lat, longitude=lng,
-                                       waste_types=types, schedule=sch, points_per_visit=pts))
-
-            for title, desc, pts, rtype, disc, partner in [
-                ("10% desc. en El Giro",        "Descuento en toda la carta.",    100, "discount",    10.0, "Restaurante El Giro"),
-                ("Bolsa ecológica reutilizable", "Bolsa de tela con logo EcoLink.",200, "benefit",    None, "Municipio de Mérida"),
-                ("Mes gratis transporte",        "Saldo para 30 días de autobús.", 500, "municipal",  None, "TAME Mérida"),
-                ("Certificado Ciudadano Eco",    "Reconocimiento oficial.",         800, "certificate",None, "Municipio de Mérida"),
-                ("20% en Oxxo Gas",              "Descuento en tu próxima carga.", 300, "discount",   20.0, "Oxxo Gas"),
-            ]:
-                db.add(Reward(title=title, description=desc, points_required=pts,
-                               reward_type=rtype, discount_percent=disc, partner_name=partner))
-
-            db.commit()
-            print("✅ Datos de demo insertados")
-
-    print("\n🚀 Todo listo. Ejecuta: reflex run")
-    print("   URL: http://localhost:3000")
-    print("   Admin: admin@ecolink.mx / admin123")
-
+        admin = User(
+            email=ADMIN_EMAIL,
+            full_name=ADMIN_NAME,
+            hashed_password=hash_password(ADMIN_PASSWORD),
+            role="admin",
+            is_active=True,
+            total_points=0,
+            level="Semilla",
+            recycling_actions=0,
+        )
+        db.add(admin)
+        db.commit()
+        print("✅ Cuenta admin creada:")
+        print(f"   Email:      {ADMIN_EMAIL}")
+        print(f"   Contraseña: {ADMIN_PASSWORD}")
+        print(f"   Ruta admin: http://localhost:3000/admin")
 
 if __name__ == "__main__":
-    main()
+    create_admin()
