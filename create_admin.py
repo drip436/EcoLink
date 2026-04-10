@@ -11,10 +11,13 @@ from sqlmodel import select
 import reflex as rx
 from ecolink.models.db import User
 from ecolink.utils.auth import hash_password
+from dotenv import load_dotenv
+load_dotenv()
 
-ADMIN_EMAIL    = "adrian@ecolink.mx"
-ADMIN_PASSWORD = "Admin2024"
-ADMIN_NAME     = "Administrador EcoLink-Adrian"
+
+ADMIN_EMAIL    = os.environ["EMAIL"],
+ADMIN_PASSWORD = os.environ["PASSWORD"],
+ADMIN_NAME     = os.environ["NAME"],
 
 def create_admin():
     with rx.session() as db:
